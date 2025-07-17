@@ -1,398 +1,538 @@
-// Save this as: src/App.js or pages/index.js (depending on your setup)
-
-import React, { useState, useEffect } from 'react';
-
-const TraumaInformedResetApp = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(10 * 60);
-  const [selectedReset, setSelectedReset] = useState('grounding');
-  const [showSafetyReminder, setShowSafetyReminder] = useState(true);
-  const [sessionComplete, setSessionComplete] = useState(false);
-
-  const resetTypes = {
-    grounding: {
-      name: "Grounding & Safety",
-      description: "Find your footing and feel secure in the present moment",
-      steps: [
-        "Notice you are safe in this moment. You have complete control.",
-        "Feel your feet on the ground. Notice 5 things you can see around you.",
-        "Take a breath only as deep as feels comfortable right now.",
-        "Notice 4 things you can touch. Feel their texture and temperature.",
-        "Allow your nervous system to recognize safety in this space.",
-        "Remember: You can pause or stop anytime. You are in control."
-      ]
-    },
-    soothing: {
-      name: "Gentle Soothing",
-      description: "Offer yourself compassion and tender care",
-      steps: [
-        "Place your hands wherever feels most comforting - heart, stomach, or lap.",
-        "Breathe naturally. There's no need to change or fix anything.",
-        "Send yourself compassion for whatever you're experiencing right now.",
-        "Your nervous system is working hard to protect you.",
-        "You are deserving of comfort, care, and gentleness.",
-        "Rest in this moment of self-compassion and acceptance."
-      ]
-    },
-    activation: {
-      name: "Gentle Activation",
-      description: "Reconnect with your strength and vitality",
-      steps: [
-        "Gently stretch your arms above your head if it feels right.",
-        "Roll your shoulders slowly backward, releasing any tension.",
-        "Take up space in a way that feels safe and empowering.",
-        "Notice your inherent strength and remarkable resilience.",
-        "Acknowledge: You survived. You are here. You are enough.",
-        "Feel your aliveness, your presence, your unshakeable worth."
-      ]
-    }
-  };
-
-  const affirmations = {
-    grounding: [
-      "I am safe in this moment",
-      "I trust my ability to care for myself",
-      "My feelings are valid and important"
-    ],
-    soothing: [
-      "I deserve compassion and kindness",
-      "I am worthy of gentleness",
-      "I honor my healing journey"
-    ],
-    activation: [
-      "I am resilient and strong",
-      "I have survived difficult things before",
-      "I choose to honor my experience"
-    ]
-  };
-
-  useEffect(() => {
-    let interval;
-    if (isPlaying && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft(prev => {
-          if (prev <= 1) {
-            setIsPlaying(false);
-            setSessionComplete(true);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying, timeLeft]);
-
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-    setSessionComplete(false);
-  };
-
-  const resetSession = () => {
-    setIsPlaying(false);
-    setCurrentStep(0);
-    setTimeLeft(10 * 60);
-    setSessionComplete(false);
-  };
-
-  const nextStep = () => {
-    if (currentStep < resetTypes[selectedReset].steps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const currentResetType = resetTypes[selectedReset];
-
-  const styles = {
-    container: {
-      backgroundColor: '#E8E2D5',
-      maxWidth: '28rem',
-      margin: '0 auto',
-      minHeight: '100vh',
-      padding: '1.5rem',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
-    },
-    card: {
-      backgroundColor: 'white',
-      borderRadius: '1.5rem',
-      padding: '1.5rem',
-      marginBottom: '2rem',
-      boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-      border: '2px solid #D4AF37'
-    },
-    button: {
-      backgroundColor: '#2D5016',
-      color: 'white',
-      border: 'none',
-      borderRadius: '1rem',
-      padding: '0.75rem 1.5rem',
-      fontWeight: 'bold',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease',
-      boxShadow: '0 4px 15px rgba(45, 80, 22, 0.3)'
-    },
-    resetButton: {
-      backgroundColor: 'white',
-      color: '#2D5016',
-      border: '2px solid #D4AF37',
-      borderRadius: '1rem',
-      padding: '0.75rem 1.5rem',
-      fontWeight: 'bold',
-      cursor: 'pointer',
-      transition: 'all 0.3s ease'
-    },
-    title: {
-      color: '#2D5016',
-      fontSize: '2.5rem',
-      fontWeight: '900',
-      textAlign: 'center',
-      marginBottom: '1rem'
-    },
-    stepText: {
-      color: '#2D5016',
-      fontSize: '1.25rem',
-      lineHeight: '1.6',
-      textAlign: 'center',
-      marginBottom: '2rem'
-    },
-    timer: {
-      color: '#2D5016',
-      fontSize: '3rem',
-      fontWeight: '900',
-      textAlign: 'center',
-      marginBottom: '1rem'
-    },
-    progressBar: {
-      width: '100%',
-      height: '0.75rem',
-      backgroundColor: 'white',
-      borderRadius: '0.5rem',
-      overflow: 'hidden',
-      border: '2px solid #D4AF37',
-      marginBottom: '2rem'
-    },
-    progress: {
-      height: '100%',
-      background: 'linear-gradient(90deg, #2D5016 0%, #D4AF37 50%, #2D5016 100%)',
-      transition: 'width 0.5s ease'
-    }
-  };
-
-  return (
-    <div style={styles.container}>
-      {/* Safety Notice */}
-      {showSafetyReminder && (
-        <div style={styles.card}>
-          <h3 style={{color: '#2D5016', fontWeight: 'bold', marginBottom: '1rem'}}>
-            Your Safety Comes First
-          </h3>
-          <p style={{color: '#2D5016', marginBottom: '1rem', opacity: 0.8}}>
-            This is your space. You can pause, skip, or stop at any time. Only engage with what feels safe and comfortable for you.
-          </p>
-          <button 
-            style={styles.button}
-            onClick={() => setShowSafetyReminder(false)}
-          >
-            I understand ✓
-          </button>
-        </div>
-      )}
-
-      {/* Header */}
-      <div style={{textAlign: 'center', marginBottom: '2rem'}}>
-        <h1 style={styles.title}>
-          TRANQUILITY<span style={{color: '#D4AF37'}}>™</span>
-        </h1>
-        <div style={{
-          width: '8rem',
-          height: '0.25rem',
-          margin: '0 auto 0.5rem',
-          borderRadius: '0.5rem',
-          background: 'linear-gradient(90deg, #D4AF37 0%, #2D5016 50%, #D4AF37 100%)'
-        }}></div>
-        <p style={{color: '#2D5016', opacity: 0.7}}>
-          Soothe the Nervous System, Feel the Calm
-        </p>
-      </div>
-
-      {/* Session Complete */}
-      {sessionComplete && (
-        <div style={styles.card}>
-          <div style={{textAlign: 'center'}}>
-            <h3 style={{color: '#2D5016', fontWeight: 'bold', marginBottom: '1rem'}}>
-              Session Complete
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tranquility - Trauma-Informed Reset</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #E8E2D5;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 28rem;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 2px solid #D4AF37;
+        }
+        
+        .button {
+            background-color: #2D5016;
+            color: white;
+            border: none;
+            border-radius: 1rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(45, 80, 22, 0.3);
+            font-size: 1rem;
+        }
+        
+        .button:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+        
+        .button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .reset-button {
+            background-color: white;
+            color: #2D5016;
+            border: 2px solid #D4AF37;
+            border-radius: 1rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .reset-button:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+        
+        .title {
+            color: #2D5016;
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .timer {
+            color: #2D5016;
+            font-size: 3rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .step-text {
+            color: #2D5016;
+            font-size: 1.25rem;
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 0.75rem;
+            background-color: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 2px solid #D4AF37;
+            margin-bottom: 2rem;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #2D5016 0%, #D4AF37 50%, #2D5016 100%);
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+        
+        .reset-option {
+            background-color: white;
+            border: 2px solid #D4AF3780;
+            border-radius: 1rem;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            width: 100%;
+            margin-bottom: 1rem;
+            display: block;
+            font-size: 1rem;
+        }
+        
+        .reset-option:hover {
+            transform: scale(1.02);
+        }
+        
+        .reset-option.selected {
+            background-color: #2D5016;
+            color: white;
+            border-color: #D4AF37;
+        }
+        
+        .affirmation {
+            background-color: rgba(212, 175, 55, 0.2);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            color: #2D5016;
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background-color: rgba(74, 103, 65, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .dot.active {
+            background-color: #D4AF37;
+            box-shadow: 0 0 8px rgba(212, 175, 55, 0.8);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .gradient-line {
+            width: 8rem;
+            height: 0.25rem;
+            margin: 0 auto 0.5rem;
+            border-radius: 0.5rem;
+            background: linear-gradient(90deg, #D4AF37 0%, #2D5016 50%, #D4AF37 100%);
+        }
+        
+        .step-badge {
+            background-color: #2D5016;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .option-title {
+            font-weight: bold;
+            font-size: 1.125rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .option-desc {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Safety Notice -->
+        <div id="safetyNotice" class="card">
+            <h3 style="color: #2D5016; font-weight: bold; margin-bottom: 1rem;">
+                🛡️ Your Safety Comes First
             </h3>
-            <p style={{color: '#2D5016', marginBottom: '1rem', opacity: 0.8}}>
-              You've taken time to care for yourself. That's something to be proud of.
+            <p style="color: #2D5016; margin-bottom: 1rem; opacity: 0.8;">
+                This is your space. You can pause, skip, or stop at any time. Only engage with what feels safe and comfortable for you.
             </p>
-            <button style={styles.button} onClick={resetSession}>
-              Start New Session
+            <button class="button" onclick="hideSafetyNotice()">
+                I understand ✓
             </button>
-          </div>
         </div>
-      )}
 
-      {/* Reset Type Selection */}
-      <div style={{marginBottom: '2rem'}}>
-        <p style={{color: '#2D5016', fontWeight: 'bold', textAlign: 'center', marginBottom: '1rem'}}>
-          Choose your reset approach:
-        </p>
-        <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
-          {Object.entries(resetTypes).map(([key, reset]) => (
-            <button
-              key={key}
-              onClick={() => setSelectedReset(key)}
-              style={{
-                backgroundColor: selectedReset === key ? '#2D5016' : 'white',
-                color: selectedReset === key ? 'white' : '#2D5016',
-                border: `2px solid ${selectedReset === key ? '#D4AF37' : '#D4AF3780'}`,
-                borderRadius: '1rem',
-                padding: '1rem',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                textAlign: 'left'
-              }}
-            >
-              <div style={{fontWeight: 'bold', fontSize: '1.125rem', marginBottom: '0.25rem'}}>
-                {reset.name}
-              </div>
-              <div style={{fontSize: '0.875rem', opacity: 0.8}}>
-                {reset.description}
-              </div>
-            </button>
-          ))}
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h1 class="title">
+                🌿 TRANQUILITY<span style="color: #D4AF37;">™</span>
+            </h1>
+            <div class="gradient-line"></div>
+            <p style="color: #2D5016; opacity: 0.7;">
+                Soothe the Nervous System, Feel the Calm
+            </p>
         </div>
-      </div>
 
-      {/* Timer */}
-      <div style={{textAlign: 'center', marginBottom: '2rem'}}>
-        <div style={styles.timer}>{formatTime(timeLeft)}</div>
-        <div style={styles.progressBar}>
-          <div 
-            style={{
-              ...styles.progress,
-              width: `${((10 * 60 - timeLeft) / (10 * 60)) * 100}%`
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Current Step */}
-      <div style={styles.card}>
-        <div style={{textAlign: 'center', marginBottom: '1rem'}}>
-          <span style={{
-            backgroundColor: '#2D5016',
-            color: 'white',
-            padding: '0.5rem 1rem',
-            borderRadius: '0.75rem',
-            fontSize: '0.875rem',
-            fontWeight: 'bold'
-          }}>
-            Step {currentStep + 1} of {currentResetType.steps.length}
-          </span>
-        </div>
-        
-        <p style={styles.stepText}>
-          {currentResetType.steps[currentStep]}
-        </p>
-        
-        {/* Navigation */}
-        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-          <button
-            onClick={prevStep}
-            disabled={currentStep === 0}
-            style={{
-              ...styles.button,
-              opacity: currentStep === 0 ? 0.3 : 1,
-              cursor: currentStep === 0 ? 'not-allowed' : 'pointer'
-            }}
-          >
-            ← Previous
-          </button>
-          
-          <div style={{display: 'flex', gap: '0.5rem'}}>
-            {currentResetType.steps.map((_, index) => (
-              <div
-                key={index}
-                style={{
-                  width: '0.5rem',
-                  height: '0.5rem',
-                  borderRadius: '50%',
-                  backgroundColor: index === currentStep ? '#D4AF37' : '#4A674160'
-                }}
-              />
-            ))}
-          </div>
-          
-          <button
-            onClick={nextStep}
-            disabled={currentStep === currentResetType.steps.length - 1}
-            style={{
-              ...styles.button,
-              opacity: currentStep === currentResetType.steps.length - 1 ? 0.3 : 1,
-              cursor: currentStep === currentResetType.steps.length - 1 ? 'not-allowed' : 'pointer'
-            }}
-          >
-            Next →
-          </button>
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div style={{display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '2rem'}}>
-        <button onClick={togglePlay} style={styles.button}>
-          {isPlaying ? '⏸ Pause' : '▶ Start'}
-        </button>
-        <button onClick={resetSession} style={styles.resetButton}>
-          ↻ Reset
-        </button>
-      </div>
-
-      {/* Affirmations */}
-      <div style={styles.card}>
-        <h3 style={{color: '#2D5016', fontWeight: 'bold', textAlign: 'center', marginBottom: '1.5rem'}}>
-          Gentle Reminders
-        </h3>
-        <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
-          {affirmations[selectedReset].map((affirmation, index) => (
-            <div 
-              key={index} 
-              style={{
-                backgroundColor: '#D4AF3730',
-                border: '1px solid #D4AF3760',
-                borderRadius: '0.75rem',
-                padding: '1rem',
-                color: '#2D5016',
-                fontStyle: 'italic'
-              }}
-            >
-              🌿 {affirmation}
+        <!-- Session Complete -->
+        <div id="sessionComplete" class="card hidden">
+            <div style="text-align: center;">
+                <h3 style="color: #2D5016; font-weight: bold; margin-bottom: 1rem;">
+                    ✨ Session Complete
+                </h3>
+                <p style="color: #2D5016; margin-bottom: 1rem; opacity: 0.8;">
+                    You've taken time to care for yourself. That's something to be proud of.
+                </p>
+                <button class="button" onclick="resetSession()">
+                    Start New Session
+                </button>
             </div>
-          ))}
         </div>
-      </div>
 
-      {/* Footer */}
-      <div style={{textAlign: 'center', fontSize: '0.75rem', color: '#2D5016', opacity: 0.6, marginTop: '2rem'}}>
-        <p>This is not a substitute for professional mental health care.</p>
-        <p>If you're in crisis, please reach out to a mental health professional.</p>
-        <p style={{fontWeight: 'bold', marginTop: '1rem'}}>© 2025 Tranquility. All rights reserved.</p>
-      </div>
+        <!-- Reset Type Selection -->
+        <div style="margin-bottom: 2rem;">
+            <p style="color: #2D5016; font-weight: bold; text-align: center; margin-bottom: 1rem;">
+                Choose your reset approach:
+            </p>
+            
+            <button class="reset-option selected" data-type="grounding" onclick="selectReset('grounding')">
+                <div class="option-title">🛡️ Grounding & Safety</div>
+                <div class="option-desc">Find your footing and feel secure in the present moment</div>
+            </button>
+            
+            <button class="reset-option" data-type="soothing" onclick="selectReset('soothing')">
+                <div class="option-title">❤️ Gentle Soothing</div>
+                <div class="option-desc">Offer yourself compassion and tender care</div>
+            </button>
+            
+            <button class="reset-option" data-type="activation" onclick="selectReset('activation')">
+                <div class="option-title">⚡ Gentle Activation</div>
+                <div class="option-desc">Reconnect with your strength and vitality</div>
+            </button>
+        </div>
+
+        <!-- Timer -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div class="timer" id="timer">10:00</div>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+        </div>
+
+        <!-- Current Step -->
+        <div class="card">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <span class="step-badge" id="stepBadge">
+                    Step 1 of 6
+                </span>
+            </div>
+            
+            <p class="step-text" id="stepText">
+                Notice you are safe in this moment. You have complete control.
+            </p>
+            
+            <!-- Navigation -->
+            <div class="navigation">
+                <button class="button" id="prevBtn" onclick="prevStep()" disabled>
+                    ← Previous
+                </button>
+                
+                <div class="dots" id="dots">
+                    <!-- Dots will be generated by JavaScript -->
+                </div>
+                
+                <button class="button" id="nextBtn" onclick="nextStep()">
+                    Next →
+                </button>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="button" id="playBtn" onclick="togglePlay()">
+                ▶ Start
+            </button>
+            <button class="reset-button" onclick="resetSession()">
+                ↻ Reset
+            </button>
+        </div>
+
+        <!-- Affirmations -->
+        <div class="card">
+            <h3 style="color: #2D5016; font-weight: bold; text-align: center; margin-bottom: 1.5rem;">
+                💭 Gentle Reminders
+            </h3>
+            <div id="affirmations">
+                <!-- Affirmations will be generated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; font-size: 0.75rem; color: #2D5016; opacity: 0.6; margin-top: 2rem;">
+            <p>This is not a substitute for professional mental health care.</p>
+            <p>If you're in crisis, please reach out to a mental health professional.</p>
+            <p style="font-weight: bold; margin-top: 1rem;">© 2025 Tranquility. All rights reserved.</p>
+        </div>
     </div>
-  );
-};
 
-export default TraumaInformedResetApp;
+    <script>
+        // App State
+        let isPlaying = false;
+        let currentStep = 0;
+        let timeLeft = 10 * 60; // 10 minutes
+        let selectedReset = 'grounding';
+        let timer = null;
+
+        // Reset Types Data
+        const resetTypes = {
+            grounding: {
+                name: "Grounding & Safety",
+                steps: [
+                    "Notice you are safe in this moment. You have complete control.",
+                    "Feel your feet on the ground. Notice 5 things you can see around you.",
+                    "Take a breath only as deep as feels comfortable right now.",
+                    "Notice 4 things you can touch. Feel their texture and temperature.",
+                    "Allow your nervous system to recognize safety in this space.",
+                    "Remember: You can pause or stop anytime. You are in control."
+                ]
+            },
+            soothing: {
+                name: "Gentle Soothing",
+                steps: [
+                    "Place your hands wherever feels most comforting - heart, stomach, or lap.",
+                    "Breathe naturally. There's no need to change or fix anything.",
+                    "Send yourself compassion for whatever you're experiencing right now.",
+                    "Your nervous system is working hard to protect you.",
+                    "You are deserving of comfort, care, and gentleness.",
+                    "Rest in this moment of self-compassion and acceptance."
+                ]
+            },
+            activation: {
+                name: "Gentle Activation",
+                steps: [
+                    "Gently stretch your arms above your head if it feels right.",
+                    "Roll your shoulders slowly backward, releasing any tension.",
+                    "Take up space in a way that feels safe and empowering.",
+                    "Notice your inherent strength and remarkable resilience.",
+                    "Acknowledge: You survived. You are here. You are enough.",
+                    "Feel your aliveness, your presence, your unshakeable worth."
+                ]
+            }
+        };
+
+        const affirmations = {
+            grounding: [
+                "I am safe in this moment",
+                "I trust my ability to care for myself",
+                "My feelings are valid and important"
+            ],
+            soothing: [
+                "I deserve compassion and kindness",
+                "I am worthy of gentleness",
+                "I honor my healing journey"
+            ],
+            activation: [
+                "I am resilient and strong",
+                "I have survived difficult things before",
+                "I choose to honor my experience"
+            ]
+        };
+
+        // Utility Functions
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimer() {
+            document.getElementById('timer').textContent = formatTime(timeLeft);
+            const progressPercent = ((10 * 60 - timeLeft) / (10 * 60)) * 100;
+            document.getElementById('progress').style.width = progressPercent + '%';
+        }
+
+        function updateStepDisplay() {
+            const steps = resetTypes[selectedReset].steps;
+            document.getElementById('stepText').textContent = steps[currentStep];
+            document.getElementById('stepBadge').textContent = `Step ${currentStep + 1} of ${steps.length}`;
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+            
+            // Update dots
+            updateDots();
+        }
+
+        function updateDots() {
+            const dotsContainer = document.getElementById('dots');
+            const steps = resetTypes[selectedReset].steps;
+            
+            dotsContainer.innerHTML = '';
+            for (let i = 0; i < steps.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = `dot ${i === currentStep ? 'active' : ''}`;
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        function updateAffirmations() {
+            const affirmationsContainer = document.getElementById('affirmations');
+            const currentAffirmations = affirmations[selectedReset];
+            
+            affirmationsContainer.innerHTML = '';
+            currentAffirmations.forEach(affirmation => {
+                const div = document.createElement('div');
+                div.className = 'affirmation';
+                div.textContent = `🌿 ${affirmation}`;
+                affirmationsContainer.appendChild(div);
+            });
+        }
+
+        // Main Functions
+        function hideSafetyNotice() {
+            document.getElementById('safetyNotice').classList.add('hidden');
+        }
+
+        function selectReset(type) {
+            selectedReset = type;
+            currentStep = 0;
+            
+            // Update selected button
+            document.querySelectorAll('.reset-option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+            
+            updateStepDisplay();
+            updateAffirmations();
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            const playBtn = document.getElementById('playBtn');
+            
+            if (isPlaying) {
+                playBtn.textContent = '⏸ Pause';
+                timer = setInterval(() => {
+                    timeLeft--;
+                    updateTimer();
+                    
+                    if (timeLeft <= 0) {
+                        isPlaying = false;
+                        playBtn.textContent = '▶ Start';
+                        clearInterval(timer);
+                        document.getElementById('sessionComplete').classList.remove('hidden');
+                    }
+                }, 1000);
+            } else {
+                playBtn.textContent = '▶ Start';
+                clearInterval(timer);
+            }
+            
+            document.getElementById('sessionComplete').classList.add('hidden');
+        }
+
+        function resetSession() {
+            isPlaying = false;
+            currentStep = 0;
+            timeLeft = 10 * 60;
+            
+            clearInterval(timer);
+            document.getElementById('playBtn').textContent = '▶ Start';
+            document.getElementById('sessionComplete').classList.add('hidden');
+            
+            updateTimer();
+            updateStepDisplay();
+        }
+
+        function nextStep() {
+            const steps = resetTypes[selectedReset].steps;
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateStepDisplay();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateStepDisplay();
+            }
+        }
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTimer();
+            updateStepDisplay();
+            updateAffirmations();
+        });
+    </script>
+</body>
+</html>
