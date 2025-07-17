@@ -1,48 +1,50 @@
+// Save this as: src/App.js or pages/index.js (depending on your setup)
+
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, RotateCcw, Heart, Shield, Zap } from 'lucide-react';
 
 const TraumaInformedResetApp = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(10 * 60); // 10 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(10 * 60);
   const [selectedReset, setSelectedReset] = useState('grounding');
   const [showSafetyReminder, setShowSafetyReminder] = useState(true);
+  const [sessionComplete, setSessionComplete] = useState(false);
 
   const resetTypes = {
     grounding: {
       name: "Grounding & Safety",
-      icon: <Shield className="w-6 h-6" />,
+      description: "Find your footing and feel secure in the present moment",
       steps: [
         "Notice you are safe in this moment. You have complete control.",
-        "Feel your feet on the ground. Notice 5 things you can see.",
-        "Take a breath only as deep as feels comfortable.",
-        "Notice 4 things you can touch around you.",
-        "Allow your nervous system to recognize safety.",
-        "You can pause or stop anytime. You are in control."
+        "Feel your feet on the ground. Notice 5 things you can see around you.",
+        "Take a breath only as deep as feels comfortable right now.",
+        "Notice 4 things you can touch. Feel their texture and temperature.",
+        "Allow your nervous system to recognize safety in this space.",
+        "Remember: You can pause or stop anytime. You are in control."
       ]
     },
     soothing: {
       name: "Gentle Soothing",
-      icon: <Heart className="w-6 h-6" />,
+      description: "Offer yourself compassion and tender care",
       steps: [
-        "Place your hands wherever feels comforting - heart, stomach, or lap.",
-        "Breathe naturally. No need to change anything.",
-        "Send yourself compassion for whatever you're feeling.",
-        "Your nervous system is trying to protect you.",
-        "You are worthy of comfort and care.",
-        "Rest in this gentle awareness."
+        "Place your hands wherever feels most comforting - heart, stomach, or lap.",
+        "Breathe naturally. There's no need to change or fix anything.",
+        "Send yourself compassion for whatever you're experiencing right now.",
+        "Your nervous system is working hard to protect you.",
+        "You are deserving of comfort, care, and gentleness.",
+        "Rest in this moment of self-compassion and acceptance."
       ]
     },
     activation: {
       name: "Gentle Activation",
-      icon: <Zap className="w-6 h-6" />,
+      description: "Reconnect with your strength and vitality",
       steps: [
-        "Gently stretch your arms above your head if it feels good.",
-        "Roll your shoulders slowly backward.",
-        "Take up space in a way that feels safe.",
-        "Notice your strength and resilience.",
-        "You survived. You are here. You are enough.",
-        "Feel your aliveness and presence."
+        "Gently stretch your arms above your head if it feels right.",
+        "Roll your shoulders slowly backward, releasing any tension.",
+        "Take up space in a way that feels safe and empowering.",
+        "Notice your inherent strength and remarkable resilience.",
+        "Acknowledge: You survived. You are here. You are enough.",
+        "Feel your aliveness, your presence, your unshakeable worth."
       ]
     }
   };
@@ -51,16 +53,16 @@ const TraumaInformedResetApp = () => {
     grounding: [
       "I am safe in this moment",
       "I trust my ability to care for myself",
-      "My feelings are valid"
+      "My feelings are valid and important"
     ],
     soothing: [
-      "I deserve compassion",
+      "I deserve compassion and kindness",
       "I am worthy of gentleness",
       "I honor my healing journey"
     ],
     activation: [
       "I am resilient and strong",
-      "I have survived difficult things",
+      "I have survived difficult things before",
       "I choose to honor my experience"
     ]
   };
@@ -69,22 +71,29 @@ const TraumaInformedResetApp = () => {
     let interval;
     if (isPlaying && timeLeft > 0) {
       interval = setInterval(() => {
-        setTimeLeft(timeLeft - 1);
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            setIsPlaying(false);
+            setSessionComplete(true);
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
-    } else if (timeLeft === 0) {
-      setIsPlaying(false);
     }
     return () => clearInterval(interval);
   }, [isPlaying, timeLeft]);
 
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
+    setSessionComplete(false);
   };
 
   const resetSession = () => {
     setIsPlaying(false);
     setCurrentStep(0);
     setTimeLeft(10 * 60);
+    setSessionComplete(false);
   };
 
   const nextStep = () => {
@@ -107,120 +116,161 @@ const TraumaInformedResetApp = () => {
 
   const currentResetType = resetTypes[selectedReset];
 
-  // Custom Leaf Logo Component matching the TRANQUILITY brand exactly
-  const TranquilityLeaf = ({ className = "w-8 h-8" }) => (
-    <svg 
-      className={className}
-      viewBox="0 0 100 140" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M50 20 C 25 25, 15 45, 20 75 C 25 105, 45 125, 50 130 C 55 125, 75 105, 80 75 C 85 45, 75 25, 50 20 Z"
-        fill="#2D5016"
-      />
-      <path
-        d="M50 35 L50 115"
-        stroke="#D4AF37"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
+  const styles = {
+    container: {
+      backgroundColor: '#E8E2D5',
+      maxWidth: '28rem',
+      margin: '0 auto',
+      minHeight: '100vh',
+      padding: '1.5rem',
+      fontFamily: 'system-ui, -apple-system, sans-serif'
+    },
+    card: {
+      backgroundColor: 'white',
+      borderRadius: '1.5rem',
+      padding: '1.5rem',
+      marginBottom: '2rem',
+      boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+      border: '2px solid #D4AF37'
+    },
+    button: {
+      backgroundColor: '#2D5016',
+      color: 'white',
+      border: 'none',
+      borderRadius: '1rem',
+      padding: '0.75rem 1.5rem',
+      fontWeight: 'bold',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      boxShadow: '0 4px 15px rgba(45, 80, 22, 0.3)'
+    },
+    resetButton: {
+      backgroundColor: 'white',
+      color: '#2D5016',
+      border: '2px solid #D4AF37',
+      borderRadius: '1rem',
+      padding: '0.75rem 1.5rem',
+      fontWeight: 'bold',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease'
+    },
+    title: {
+      color: '#2D5016',
+      fontSize: '2.5rem',
+      fontWeight: '900',
+      textAlign: 'center',
+      marginBottom: '1rem'
+    },
+    stepText: {
+      color: '#2D5016',
+      fontSize: '1.25rem',
+      lineHeight: '1.6',
+      textAlign: 'center',
+      marginBottom: '2rem'
+    },
+    timer: {
+      color: '#2D5016',
+      fontSize: '3rem',
+      fontWeight: '900',
+      textAlign: 'center',
+      marginBottom: '1rem'
+    },
+    progressBar: {
+      width: '100%',
+      height: '0.75rem',
+      backgroundColor: 'white',
+      borderRadius: '0.5rem',
+      overflow: 'hidden',
+      border: '2px solid #D4AF37',
+      marginBottom: '2rem'
+    },
+    progress: {
+      height: '100%',
+      background: 'linear-gradient(90deg, #2D5016 0%, #D4AF37 50%, #2D5016 100%)',
+      transition: 'width 0.5s ease'
+    }
+  };
 
   return (
-    <div style={{ backgroundColor: '#E8E2D5' }} className="max-w-md mx-auto min-h-screen p-6 relative">
-      {/* Subtle floating elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-28 h-28 rounded-full animate-pulse opacity-8" style={{ background: 'radial-gradient(circle, #2D501630, transparent)' }}></div>
-        <div className="absolute top-1/2 right-1/4 w-24 h-24 rounded-full animate-pulse opacity-6" style={{ background: 'radial-gradient(circle, #4A6741, transparent)' }}></div>
-        <div className="absolute bottom-1/4 left-1/3 w-20 h-20 rounded-full animate-pulse opacity-4" style={{ background: 'radial-gradient(circle, #6B8E23, transparent)' }}></div>
-        
-        {/* Floating natural particles */}
-        <div className="absolute top-1/5 left-1/6 w-1 h-1 rounded-full animate-bounce opacity-30" style={{ backgroundColor: '#2D5016' }}></div>
-        <div className="absolute top-1/3 right-1/3 w-0.5 h-0.5 rounded-full animate-pulse opacity-40" style={{ backgroundColor: '#4A6741' }}></div>
-        <div className="absolute bottom-1/3 left-1/4 w-1.5 h-1.5 rounded-full animate-bounce opacity-25" style={{ backgroundColor: '#6B8E23' }}></div>
-        <div className="absolute top-2/3 right-1/5 w-0.5 h-0.5 rounded-full animate-pulse opacity-35" style={{ backgroundColor: '#2D5016' }}></div>
-      </div>
-
+    <div style={styles.container}>
       {/* Safety Notice */}
       {showSafetyReminder && (
-        <div className="bg-white rounded-3xl p-6 mb-8 shadow-lg border-2" style={{ borderColor: '#4A6741' }}>
-          <div className="flex items-start space-x-4">
-            <div className="p-3 rounded-2xl shadow-inner" style={{ backgroundColor: '#2D501620' }}>
-              <Shield className="w-6 h-6" style={{ color: '#2D5016' }} />
-            </div>
-            <div>
-              <h3 className="font-bold text-lg mb-2" style={{ color: '#2D5016' }}>Your Safety Matters</h3>
-              <p className="text-sm leading-relaxed mb-4" style={{ color: '#2D5016', opacity: 0.8 }}>
-                You can pause, skip, or stop at any time. Only do what feels safe and comfortable.
-              </p>
-              <button 
-                onClick={() => setShowSafetyReminder(false)}
-                className="text-white text-sm font-bold px-6 py-2 rounded-full hover:opacity-90 transition-all duration-300 shadow-md"
-                style={{ 
-                  backgroundColor: '#2D5016',
-                  boxShadow: '0 4px 15px rgba(45, 80, 22, 0.3)'
-                }}
-              >
-                I understand ✓
-              </button>
-            </div>
+        <div style={styles.card}>
+          <h3 style={{color: '#2D5016', fontWeight: 'bold', marginBottom: '1rem'}}>
+            Your Safety Comes First
+          </h3>
+          <p style={{color: '#2D5016', marginBottom: '1rem', opacity: 0.8}}>
+            This is your space. You can pause, skip, or stop at any time. Only engage with what feels safe and comfortable for you.
+          </p>
+          <button 
+            style={styles.button}
+            onClick={() => setShowSafetyReminder(false)}
+          >
+            I understand ✓
+          </button>
+        </div>
+      )}
+
+      {/* Header */}
+      <div style={{textAlign: 'center', marginBottom: '2rem'}}>
+        <h1 style={styles.title}>
+          TRANQUILITY<span style={{color: '#D4AF37'}}>™</span>
+        </h1>
+        <div style={{
+          width: '8rem',
+          height: '0.25rem',
+          margin: '0 auto 0.5rem',
+          borderRadius: '0.5rem',
+          background: 'linear-gradient(90deg, #D4AF37 0%, #2D5016 50%, #D4AF37 100%)'
+        }}></div>
+        <p style={{color: '#2D5016', opacity: 0.7}}>
+          Soothe the Nervous System, Feel the Calm
+        </p>
+      </div>
+
+      {/* Session Complete */}
+      {sessionComplete && (
+        <div style={styles.card}>
+          <div style={{textAlign: 'center'}}>
+            <h3 style={{color: '#2D5016', fontWeight: 'bold', marginBottom: '1rem'}}>
+              Session Complete
+            </h3>
+            <p style={{color: '#2D5016', marginBottom: '1rem', opacity: 0.8}}>
+              You've taken time to care for yourself. That's something to be proud of.
+            </p>
+            <button style={styles.button} onClick={resetSession}>
+              Start New Session
+            </button>
           </div>
         </div>
       )}
 
-      {/* Header with Logo */}
-      <div className="text-center mb-12">
-        <div className="relative flex items-center justify-center mb-6">
-          <div className="relative">
-            <h1 className="text-5xl font-black tracking-wider" style={{ color: '#2D5016' }}>
-              TRANQUILITY<span className="text-2xl align-top ml-1" style={{ color: '#D4AF37' }}>™</span>
-            </h1>
-            <div className="absolute -top-10 right-8" style={{ transform: 'rotate(25deg)' }}>
-              <TranquilityLeaf className="w-10 h-12" />
-            </div>
-          </div>
-        </div>
-        <div className="w-40 h-1.5 mx-auto mb-3 rounded-full shadow-lg" style={{ 
-          background: 'linear-gradient(90deg, #D4AF37 0%, #2D5016 50%, #D4AF37 100%)',
-          boxShadow: '0 0 10px rgba(212, 175, 55, 0.4)'
-        }}></div>
-        <p className="text-lg font-medium" style={{ color: '#2D5016', opacity: 0.7 }}>Soothe the Nervous System, Feel the Calm.</p>
-      </div>
-
       {/* Reset Type Selection */}
-      <div className="mb-12">
-        <p className="font-bold mb-6 text-center text-xl" style={{ color: '#2D5016' }}>Choose your reset type:</p>
-        <div className="space-y-5">
+      <div style={{marginBottom: '2rem'}}>
+        <p style={{color: '#2D5016', fontWeight: 'bold', textAlign: 'center', marginBottom: '1rem'}}>
+          Choose your reset approach:
+        </p>
+        <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
           {Object.entries(resetTypes).map(([key, reset]) => (
             <button
               key={key}
               onClick={() => setSelectedReset(key)}
-              className={`w-full p-6 rounded-3xl border-2 transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg ${
-                selectedReset === key 
-                  ? 'text-white shadow-xl' 
-                  : 'hover:shadow-lg'
-              }`}
               style={{
                 backgroundColor: selectedReset === key ? '#2D5016' : 'white',
-                borderColor: selectedReset === key ? '#D4AF37' : '#D4AF3780',
                 color: selectedReset === key ? 'white' : '#2D5016',
-                boxShadow: selectedReset === key 
-                  ? '0 8px 25px rgba(45, 80, 22, 0.3)' 
-                  : '0 4px 15px rgba(74, 103, 65, 0.15)'
+                border: `2px solid ${selectedReset === key ? '#D4AF37' : '#D4AF3780'}`,
+                borderRadius: '1rem',
+                padding: '1rem',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                textAlign: 'left'
               }}
             >
-              <div className="flex items-center space-x-5">
-                <div 
-                  className="p-4 rounded-2xl transition-all duration-300 shadow-inner"
-                  style={{
-                    backgroundColor: selectedReset === key ? '#D4AF3750' : '#2D501620'
-                  }}
-                >
-                  {reset.icon}
-                </div>
-                <span className="font-bold text-xl">{reset.name}</span>
+              <div style={{fontWeight: 'bold', fontSize: '1.125rem', marginBottom: '0.25rem'}}>
+                {reset.name}
+              </div>
+              <div style={{fontSize: '0.875rem', opacity: 0.8}}>
+                {reset.description}
               </div>
             </button>
           ))}
@@ -228,77 +278,72 @@ const TraumaInformedResetApp = () => {
       </div>
 
       {/* Timer */}
-      <div className="text-center mb-12">
-        <div className="text-7xl font-black mb-6" style={{ 
-          color: '#2D5016'
-        }}>
-          {formatTime(timeLeft)}
-        </div>
-        <div className="w-full bg-white rounded-full h-5 overflow-hidden shadow-inner border-2" style={{ 
-          borderColor: '#D4AF37'
-        }}>
+      <div style={{textAlign: 'center', marginBottom: '2rem'}}>
+        <div style={styles.timer}>{formatTime(timeLeft)}</div>
+        <div style={styles.progressBar}>
           <div 
-            className="h-5 rounded-full transition-all duration-500"
-            style={{ 
-              background: `linear-gradient(90deg, #2D5016 0%, #D4AF37 50%, #2D5016 100%)`,
-              width: `${((10 * 60 - timeLeft) / (10 * 60)) * 100}%`,
-              boxShadow: '0 0 15px rgba(212, 175, 55, 0.6)'
+            style={{
+              ...styles.progress,
+              width: `${((10 * 60 - timeLeft) / (10 * 60)) * 100}%`
             }}
           />
         </div>
       </div>
 
       {/* Current Step */}
-      <div className="bg-white rounded-3xl p-8 mb-12 shadow-xl border-2" style={{ 
-        borderColor: '#D4AF37'
-      }}>
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <span 
-              className="inline-block px-8 py-3 rounded-2xl text-sm font-bold text-white shadow-lg"
-              style={{ 
-                backgroundColor: '#2D5016',
-                boxShadow: '0 6px 20px rgba(212, 175, 55, 0.4)'
-              }}
-            >
-              Step {currentStep + 1} of {currentResetType.steps.length}
-            </span>
-          </div>
+      <div style={styles.card}>
+        <div style={{textAlign: 'center', marginBottom: '1rem'}}>
+          <span style={{
+            backgroundColor: '#2D5016',
+            color: 'white',
+            padding: '0.5rem 1rem',
+            borderRadius: '0.75rem',
+            fontSize: '0.875rem',
+            fontWeight: 'bold'
+          }}>
+            Step {currentStep + 1} of {currentResetType.steps.length}
+          </span>
         </div>
-        <p className="text-2xl leading-relaxed text-center mb-10 font-medium" style={{ color: '#2D5016' }}>
+        
+        <p style={styles.stepText}>
           {currentResetType.steps[currentStep]}
         </p>
         
-        {/* Step Navigation */}
-        <div className="flex justify-between items-center">
+        {/* Navigation */}
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
           <button
             onClick={prevStep}
             disabled={currentStep === 0}
-            className="px-8 py-4 text-sm rounded-2xl font-bold disabled:opacity-30 hover:opacity-80 transition-all duration-300 shadow-sm text-white"
-            style={{ 
-              backgroundColor: '#4A6741'
+            style={{
+              ...styles.button,
+              opacity: currentStep === 0 ? 0.3 : 1,
+              cursor: currentStep === 0 ? 'not-allowed' : 'pointer'
             }}
           >
             ← Previous
           </button>
-          <div className="flex space-x-3">
+          
+          <div style={{display: 'flex', gap: '0.5rem'}}>
             {currentResetType.steps.map((_, index) => (
               <div
                 key={index}
-                className="w-3 h-3 rounded-full transition-all duration-500"
-                style={{ 
-                  backgroundColor: index === currentStep ? '#D4AF37' : '#4A674160',
-                  boxShadow: index === currentStep ? '0 0 12px rgba(212, 175, 55, 0.8)' : 'none'
+                style={{
+                  width: '0.5rem',
+                  height: '0.5rem',
+                  borderRadius: '50%',
+                  backgroundColor: index === currentStep ? '#D4AF37' : '#4A674160'
                 }}
               />
             ))}
           </div>
+          
           <button
             onClick={nextStep}
             disabled={currentStep === currentResetType.steps.length - 1}
-            className="px-8 py-4 text-sm rounded-2xl font-bold disabled:opacity-30 hover:opacity-80 transition-all duration-300 shadow-sm text-white"
-            style={{ 
-              backgroundColor: '#4A6741'
+            style={{
+              ...styles.button,
+              opacity: currentStep === currentResetType.steps.length - 1 ? 0.3 : 1,
+              cursor: currentStep === currentResetType.steps.length - 1 ? 'not-allowed' : 'pointer'
             }}
           >
             Next →
@@ -307,62 +352,44 @@ const TraumaInformedResetApp = () => {
       </div>
 
       {/* Controls */}
-      <div className="flex justify-center space-x-6 mb-12">
-        <button
-          onClick={togglePlay}
-          className="flex items-center space-x-4 px-12 py-5 rounded-3xl text-white font-black text-xl hover:opacity-90 transition-all duration-300 transform hover:scale-105 shadow-xl"
-          style={{ 
-            backgroundColor: '#2D5016',
-            boxShadow: '0 10px 30px rgba(212, 175, 55, 0.4)'
-          }}
-        >
-          {isPlaying ? <Pause className="w-8 h-8" /> : <Play className="w-8 h-8" />}
-          <span>{isPlaying ? 'Pause' : 'Start'}</span>
+      <div style={{display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '2rem'}}>
+        <button onClick={togglePlay} style={styles.button}>
+          {isPlaying ? '⏸ Pause' : '▶ Start'}
         </button>
-        <button
-          onClick={resetSession}
-          className="flex items-center space-x-4 px-12 py-5 bg-white rounded-3xl hover:opacity-90 transition-all duration-300 transform hover:scale-105 border-2 font-black text-xl shadow-xl"
-          style={{ 
-            borderColor: '#D4AF37',
-            color: '#2D5016'
-          }}
-        >
-          <RotateCcw className="w-8 h-8" />
-          <span>Reset</span>
+        <button onClick={resetSession} style={styles.resetButton}>
+          ↻ Reset
         </button>
       </div>
 
       {/* Affirmations */}
-      <div className="bg-white rounded-3xl p-8 shadow-xl border-2" style={{ 
-        borderColor: '#D4AF37'
-      }}>
-        <h3 className="font-black mb-8 text-center text-2xl" style={{ color: '#2D5016' }}>Gentle Reminders</h3>
-        <div className="space-y-6">
+      <div style={styles.card}>
+        <h3 style={{color: '#2D5016', fontWeight: 'bold', textAlign: 'center', marginBottom: '1.5rem'}}>
+          Gentle Reminders
+        </h3>
+        <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
           {affirmations[selectedReset].map((affirmation, index) => (
             <div 
               key={index} 
-              className="flex items-center space-x-5 p-5 rounded-2xl border"
-              style={{ 
+              style={{
                 backgroundColor: '#D4AF3730',
-                borderColor: '#D4AF3760'
+                border: '1px solid #D4AF3760',
+                borderRadius: '0.75rem',
+                padding: '1rem',
+                color: '#2D5016',
+                fontStyle: 'italic'
               }}
             >
-              <TranquilityLeaf className="w-5 h-6" />
-              <span className="font-semibold italic text-lg" style={{ color: '#2D5016' }}>{affirmation}</span>
+              🌿 {affirmation}
             </div>
           ))}
         </div>
       </div>
 
       {/* Footer */}
-      <div className="mt-12 text-center text-sm space-y-3" style={{ color: '#2D5016', opacity: 0.6 }}>
+      <div style={{textAlign: 'center', fontSize: '0.75rem', color: '#2D5016', opacity: 0.6, marginTop: '2rem'}}>
         <p>This is not a substitute for professional mental health care.</p>
         <p>If you're in crisis, please reach out to a mental health professional.</p>
-        <div className="w-20 h-0.5 mx-auto my-4 rounded-full shadow-sm" style={{ 
-          background: 'linear-gradient(90deg, #D4AF37 0%, #2D5016 50%, #D4AF37 100%)',
-          boxShadow: '0 0 8px rgba(212, 175, 55, 0.4)'
-        }}></div>
-        <p className="font-bold" style={{ color: '#2D5016' }}>© 2025 Tranquility. All rights reserved.</p>
+        <p style={{fontWeight: 'bold', marginTop: '1rem'}}>© 2025 Tranquility. All rights reserved.</p>
       </div>
     </div>
   );
