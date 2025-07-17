@@ -361,7 +361,7 @@
                     🎤 <span id="voiceText">Voice</span>
                 </button>
                 <button class="audio-btn" id="musicBtn" onclick="toggleMusic()">
-                    🎹 <span id="musicText">Music</span>
+                    🎹 <span id="musicText">Piano Music</span>
                 </button>
             </div>
             <div class="volume-control" style="justify-content: center;">
@@ -470,11 +470,13 @@
         let timer = null;
         let stepTimer = null;
         let stepProgressTimer = null;
-        let stepDuration = 20; // 20 seconds per step
-        let stepTimeLeft = 20;
+        let stepDuration = 15; // 15 seconds per step (faster transitions)
+        let stepTimeLeft = 15;
         let voiceEnabled = false;
         let musicEnabled = false;
         let backgroundMusic = null;
+        let musicAudio = null;
+        let customMusicUrl = 'https://cdn.pixabay.com/download/audio/2024/05/28/audio_0b3cca7bb6.mp3'; // Your peaceful piano music
         let speechSynthesis = window.speechSynthesis;
         let currentUtterance = null;
 
@@ -634,20 +636,56 @@
 
         // Audio Functions
         function createBackgroundMusic() {
+            // Use your custom peaceful piano music
+            if (!musicAudio) {
+                musicAudio = new Audio(customMusicUrl);
+                musicAudio.loop = true; // Loop the music continuously
+                musicAudio.volume = 0.3; // Start at gentle volume
+                musicAudio.preload = 'auto';
+                
+                // Handle loading errors gracefully
+                musicAudio.onerror = () => {
+                    console.log('Custom music failed to load, using backup tones');
+                    return createBackupMusic();
+                };
+            }
+            
+            return {
+                start: async () => {
+                    try {
+                        await musicAudio.play();
+                        return true;
+                    } catch (error) {
+                        console.log('Piano music failed, using backup');
+                        return createBackupMusic();
+                    }
+                },
+                stop: () => {
+                    musicAudio.pause();
+                    musicAudio.currentTime = 0;
+                },
+                setVolume: (volume) => {
+                    musicAudio.volume = volume * 0.5; // Max 50% volume for background music
+                }
+            };
+        }
+
+        function createBackupMusic() {
+            // Backup calming tones if piano music fails
             try {
                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const oscillator1 = audioContext.createOscillator();
                 const oscillator2 = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
                 
-                // Create calming frequencies
-                oscillator1.frequency.setValueAtTime(220, audioContext.currentTime); // A3
-                oscillator2.frequency.setValueAtTime(330, audioContext.currentTime); // E4
+                // Much softer, more musical frequencies
+                oscillator1.frequency.setValueAtTime(174, audioContext.currentTime); // Healing frequency
+                oscillator2.frequency.setValueAtTime(396, audioContext.currentTime); // Root chakra frequency
                 
                 oscillator1.type = 'sine';
                 oscillator2.type = 'sine';
                 
-                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.05, audioContext.currentTime); // Very soft
                 
                 oscillator1.connect(gainNode);
                 oscillator2.connect(gainNode);
@@ -670,7 +708,7 @@
                         } catch (e) {}
                     },
                     setVolume: (volume) => {
-                        gainNode.gain.setValueAtTime(volume * 0.1, audioContext.currentTime);
+                        gainNode.gain.setValueAtTime(volume * 0.05, audioContext.currentTime);
                     }
                 };
             } catch (e) {
@@ -687,26 +725,82 @@
                 speechSynthesis.cancel();
             }
             
-            currentUtterance = new SpeechSynthesisUtterance(text);
-            currentUtterance.rate = 0.8; // Slower, more calming pace
-            currentUtterance.pitch = 0.9; // Slightly lower pitch
-            currentUtterance.volume = 0.7; // Gentle volume
-            
-            // Try to use a female voice for a more soothing experience
-            const voices = speechSynthesis.getVoices();
-            const femaleVoice = voices.find(voice => 
-                voice.name.toLowerCase().includes('female') || 
-                voice.name.toLowerCase().includes('woman') ||
-                voice.name.toLowerCase().includes('samantha') ||
-                voice.name.toLowerCase().includes('karen') ||
-                voice.name.toLowerCase().includes('zira')
-            );
-            
-            if (femaleVoice) {
-                currentUtterance.voice = femaleVoice;
-            }
-            
-            speechSynthesis.speak(currentUtterance);
+            // Wait a moment for voices to load
+            setTimeout(() => {
+                const voices = speechSynthesis.getVoices();
+                
+                currentUtterance = new SpeechSynthesisUtterance(text);
+                
+                // Much slower, more therapeutic settings
+                currentUtterance.rate = 0.5; // Very slow, gentle pace
+                currentUtterance.pitch = 0.7; // Lower, warmer pitch
+                currentUtterance.volume = 0.9; // Clear but gentle
+                
+                // Add pauses between sentences for a more caring delivery
+                const textWithPauses = text.replace(/\./g, '... ').replace(/,/g, ', ');
+                currentUtterance.text = textWithPauses;
+                
+                // Prioritize the most human-like, caring voices
+                let selectedVoice = null;
+                
+                // Look for premium female voices (most soothing)
+                const premiumFemaleVoices = voices.filter(voice => 
+                    voice.lang.startsWith('en') && (
+                        voice.name.toLowerCase().includes('samantha') ||
+                        voice.name.toLowerCase().includes('karen') ||
+                        voice.name.toLowerCase().includes('moira') ||
+                        voice.name.toLowerCase().includes('fiona') ||
+                        voice.name.toLowerCase().includes('tessa') ||
+                        voice.name.toLowerCase().includes('ava') ||
+                        voice.name.toLowerCase().includes('allison') ||
+                        voice.name.toLowerCase().includes('susan') ||
+                        voice.name.toLowerCase().includes('victoria') ||
+                        voice.name.toLowerCase().includes('serena')
+                    )
+                );
+                
+                // Look for any female voices
+                const femaleVoices = voices.filter(voice => 
+                    voice.lang.startsWith('en') && (
+                        voice.name.toLowerCase().includes('female') ||
+                        voice.name.toLowerCase().includes('woman') ||
+                        voice.name.toLowerCase().includes('zira') ||
+                        voice.name.toLowerCase().includes('hazel') ||
+                        voice.name.toLowerCase().includes('kate')
+                    )
+                );
+                
+                // Look for neural/natural voices (usually higher quality)
+                const neuralVoices = voices.filter(voice => 
+                    voice.lang.startsWith('en') && (
+                        voice.name.toLowerCase().includes('neural') ||
+                        voice.name.toLowerCase().includes('natural') ||
+                        voice.name.toLowerCase().includes('enhanced')
+                    )
+                );
+                
+                // Select the best available voice
+                if (premiumFemaleVoices.length > 0) {
+                    selectedVoice = premiumFemaleVoices[0];
+                } else if (neuralVoices.length > 0) {
+                    selectedVoice = neuralVoices[0];
+                } else if (femaleVoices.length > 0) {
+                    selectedVoice = femaleVoices[0];
+                } else {
+                    // Fallback to any English voice that sounds gentle
+                    const gentleVoices = voices.filter(voice => 
+                        voice.lang.startsWith('en') && !voice.name.toLowerCase().includes('male')
+                    );
+                    selectedVoice = gentleVoices[0] || voices.find(voice => voice.lang.startsWith('en'));
+                }
+                
+                if (selectedVoice) {
+                    currentUtterance.voice = selectedVoice;
+                    console.log('Using voice:', selectedVoice.name);
+                }
+                
+                speechSynthesis.speak(currentUtterance);
+            }, 100);
         }
 
         // Main Functions
@@ -756,7 +850,7 @@
             
             if (musicEnabled) {
                 musicBtn.classList.add('active');
-                musicText.textContent = 'Music On';
+                musicText.textContent = 'Piano On';
                 
                 if (!backgroundMusic) {
                     backgroundMusic = createBackgroundMusic();
@@ -767,11 +861,16 @@
                 }
             } else {
                 musicBtn.classList.remove('active');
-                musicText.textContent = 'Music';
+                musicText.textContent = 'Piano Music';
                 
                 if (backgroundMusic) {
                     backgroundMusic.stop();
                     backgroundMusic = null;
+                }
+                
+                if (musicAudio) {
+                    musicAudio.pause();
+                    musicAudio.currentTime = 0;
                 }
             }
         }
@@ -781,6 +880,10 @@
             
             if (backgroundMusic && musicEnabled) {
                 backgroundMusic.setVolume(volume);
+            }
+            
+            if (musicAudio) {
+                musicAudio.volume = volume * 0.5; // Keep piano music gentle
             }
         }
 
@@ -819,7 +922,7 @@
                             backgroundMusic = null;
                             musicEnabled = false;
                             document.getElementById('musicBtn').classList.remove('active');
-                            document.getElementById('musicText').textContent = 'Music';
+                            document.getElementById('musicText').textContent = 'Piano Music';
                         }
                         
                         // Completion message
@@ -852,7 +955,7 @@
                 backgroundMusic = null;
                 musicEnabled = false;
                 document.getElementById('musicBtn').classList.remove('active');
-                document.getElementById('musicText').textContent = 'Music';
+                document.getElementById('musicText').textContent = 'Piano Music';
             }
             
             document.getElementById('playBtn').textContent = '▶ Start';
